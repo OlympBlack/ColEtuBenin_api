@@ -39,6 +39,18 @@ class DashboardController extends Controller
             ->sortByDesc('last_message_at')
             ->values();
 
+        // Garantir strictement une seule discussion par interlocuteur (un seul contact dans la liste)
+        $uniqueConversations = collect();
+        $seenPartnerIds = [];
+        foreach ($conversations as $c) {
+            $partnerId = (int) $c->sender_id === (int) $user->id ? (int) $c->receiver_id : (int) $c->sender_id;
+            if ($partnerId > 0 && !in_array($partnerId, $seenPartnerIds, true)) {
+                $seenPartnerIds[] = $partnerId;
+                $uniqueConversations->push($c);
+            }
+        }
+        $conversations = $uniqueConversations;
+
         $baseData = [
             'user' => ApiData::user($user),
             'profile_progress' => [

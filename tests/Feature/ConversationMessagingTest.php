@@ -88,4 +88,81 @@ class ConversationMessagingTest extends TestCase
         ]);
         $forbiddenResponse->assertForbidden();
     }
+
+    public function test_same_interlocutors_share_single_unique_conversation_across_different_annonces(): void
+    {
+        $landlord = User::factory()->create([
+            'prenoms' => 'Plateforme Admin',
+            'telephone' => '+22997000001',
+            'role' => 'demarcheur',
+            'statut_verification' => 'valide',
+        ]);
+
+        $student = User::factory()->create([
+            'prenoms' => 'Etudiant Test',
+            'telephone' => '+22997000002',
+            'role' => 'etudiant',
+            'statut_verification' => 'valide',
+        ]);
+
+        $annonce1 = Annonce::create([
+            'user_id' => $landlord->id,
+            'titre' => 'Chambre 1',
+            'description' => 'Description chambre 1',
+            'quartier' => 'Zogbadje',
+            'loyer' => 25000,
+            'caution' => 50000,
+            'source_eau' => 'forage',
+            'type_electricite' => 'sbee_carte',
+            'type_annonce' => 'CHAMBRE_COMPLETE',
+            'statut_disponibilite' => 'DISPONIBLE',
+            'statut_publication' => 'VALIDEE',
+        ]);
+
+        $annonce2 = Annonce::create([
+            'user_id' => $landlord->id,
+            'titre' => 'Chambre 2',
+            'description' => 'Description chambre 2',
+            'quartier' => 'Calavi Kpota',
+            'loyer' => 30000,
+            'caution' => 60000,
+            'source_eau' => 'forage',
+            'type_electricite' => 'sbee_carte',
+            'type_annonce' => 'CHAMBRE_COMPLETE',
+            'statut_disponibilite' => 'DISPONIBLE',
+            'statut_publication' => 'VALIDEE',
+        ]);
+
+        Sanctum::actingAs($student);
+
+        // 1. L'etudiant contacte le proprietaire sur l'annonce 1
+        $res1 = $this->postJson("/api/annonces/{$annonce1->id}/messages", [
+            'message' => 'Bonjour pour la chambre 1',
+        ]);
+        $res1->assertOk();
+        $convId1 = $res1->json('data.conversation.id');
+
+        // 2. L'etudiant contacte le meme proprietaire sur l'annonce 2
+        $res2 = $this->postJson("/api/annonces/{$annonce2->id}/messages", [
+            'message' => 'Bonjour aussi pour la chambre 2',
+        ]);
+        $res2->assertOk();
+        $convId2 = $res2->json('data.conversation.id');
+
+        // Ils doivent partager la MEME conversation unique
+        $this->assertEquals($convId1, $convId2, 'Deux annonces pour un meme interlocuteur doivent reutiliser la meme conversation unique');
+
+        // Verifier qu'il n'y a qu'une seule conversation en base entre ces 2 utilisateurs
+        $conversationsCount = Conversation::where(function ($q) use ($student, $landlord) {
+            $q->where('sender_id', $student->id)->where('receiver_id', $landlord->id)
+              ->orWhere('sender_id', $landlord->id)->where('receiver_id', $student->id);
+        })->count();
+        $this->assertEquals(1, $conversationsCount);
+
+        // Verifier que la liste du Dashboard ne renvoie qu'une seule fois l'interlocuteur
+        $dashResponse = $this->getJson('/api/dashboard');
+        $dashResponse->assertOk();
+        $mesConvs = $dashResponse->json('data.mes_conversations');
+        $this->assertCount(1, $mesConvs);
+    }
 }

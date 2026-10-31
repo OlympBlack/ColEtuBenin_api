@@ -6,6 +6,8 @@ use App\Models\Avis;
 use App\Models\Conversation;
 use App\Models\ConversationMessage;
 use App\Models\User;
+use App\Notifications\Channels\WebPushChannel;
+use App\Support\ApiData;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
@@ -23,7 +25,25 @@ class AvisMessageNotification extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database', 'broadcast'];
+        return ['database', 'broadcast', WebPushChannel::class];
+    }
+
+    public function toWebPush(object $notifiable): array
+    {
+        $senderName = trim(($this->sender->prenoms ?? '') . ' ' . ($this->sender->name ?? '')) ?: 'Nouveau message';
+        $isAudio = $this->conversationMessage->type === 'audio' || (bool) $this->conversationMessage->media_url;
+
+        return [
+            'title' => $senderName . ' sur ColCampus',
+            'body' => $isAudio
+                ? '🎤 Nouveau message vocal'
+                : ($this->conversationMessage->content ?: 'Vous a envoyé un message'),
+            'icon' => ApiData::fileUrl($this->sender->photo_profil),
+            'tag' => 'colcampus-msg-' . $this->conversation->id,
+            'conversationId' => $this->conversation->id,
+            'url' => '/#/?conversation=' . $this->conversation->id,
+            'type' => 'avis_message',
+        ];
     }
 
     public function toBroadcast(object $notifiable): \Illuminate\Notifications\Messages\BroadcastMessage

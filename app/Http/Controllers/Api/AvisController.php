@@ -212,18 +212,16 @@ class AvisController extends Controller
             ], 422);
         }
 
-        $conversation = Conversation::query()
-            ->where('avis_id', $avis->id)
-            ->where(function ($query) use ($avis, $user) {
-                $query->where(function ($sub) use ($avis, $user) {
-                    $sub->where('sender_id', $user->id)->where('receiver_id', $avis->user_id);
-                })->orWhere(function ($sub) use ($avis, $user) {
-                    $sub->where('sender_id', $avis->user_id)->where('receiver_id', $user->id);
-                });
-            })
-            ->first();
+        $conversation = Conversation::findBetween($user->id, (int) $avis->user_id);
 
-        if (!$conversation) {
+        if ($conversation) {
+            if ((int) $conversation->avis_id !== (int) $avis->id || $conversation->annonce_id !== null) {
+                $conversation->update([
+                    'avis_id' => $avis->id,
+                    'annonce_id' => null,
+                ]);
+            }
+        } else {
             $conversation = Conversation::create([
                 'annonce_id' => null,
                 'avis_id' => $avis->id,

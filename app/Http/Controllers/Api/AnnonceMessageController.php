@@ -264,18 +264,20 @@ class AnnonceMessageController extends Controller
 
     private function resolveConversation(Annonce $annonce, int $userId): ?Conversation
     {
-        return Conversation::query()
-            ->where('annonce_id', $annonce->id)
-            ->where(function ($query) use ($annonce, $userId) {
-                $query->where(function ($query) use ($annonce, $userId) {
-                    $query->where('sender_id', $userId)
-                        ->where('receiver_id', $annonce->user_id);
-                })->orWhere(function ($query) use ($annonce, $userId) {
-                    $query->where('sender_id', $annonce->user_id)
-                        ->where('receiver_id', $userId);
-                });
-            })
-            ->first();
+        $conversation = Conversation::findBetween($userId, (int) $annonce->user_id);
+
+        if ($conversation) {
+            // Mettre a jour l'annonce de reference de la conversation vers la derniere annonce concernee
+            if ((int) $conversation->annonce_id !== (int) $annonce->id || $conversation->avis_id !== null) {
+                $conversation->update([
+                    'annonce_id' => $annonce->id,
+                    'avis_id' => null,
+                ]);
+            }
+            return $conversation;
+        }
+
+        return null;
     }
 
     private function markMessagesAsRead(Conversation $conversation, int $userId): void

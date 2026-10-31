@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\ManagedPubliciteController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\OtpController;
 use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\PushSubscriptionController;
 use App\Http\Controllers\Api\PubliciteBoutiqueController;
 use App\Http\Controllers\Api\RegisterController;
 use App\Http\Controllers\Api\ControleurForfait;
@@ -28,6 +29,7 @@ Route::get('/annonces/{annonce}/similaires', [AnnonceController::class, 'similar
 Route::get('/avis', [AvisController::class, 'index']);
 Route::get('/avis/{avis}', [AvisController::class, 'show']);
 
+Route::get('/push/public-key', [PushSubscriptionController::class, 'publicKey']);
 Route::get('/universites', [\App\Http\Controllers\Api\UniversiteController::class, 'index']);
 Route::get('/quartiers', [\App\Http\Controllers\Api\QuartierController::class, 'index']);
 Route::get('/publicites-boutiques', [PubliciteBoutiqueController::class, 'index']);
@@ -57,6 +59,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/annonces/{annonce}/favori', [FavoriteController::class, 'destroy']);
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::patch('/notifications/{notificationId}/read', [NotificationController::class, 'markAsRead']);
+    Route::post('/push/subscriptions', [PushSubscriptionController::class, 'store']);
+    Route::delete('/push/subscriptions', [PushSubscriptionController::class, 'destroy']);
     Route::post('/profile/complete', [ProfileController::class, 'completeProfile']);
 
     // Avis etudiants : publication et discussion avec les demarcheurs

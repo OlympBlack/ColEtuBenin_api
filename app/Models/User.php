@@ -119,6 +119,11 @@ class User extends Authenticatable
         return $this->hasMany(ConversationMessage::class);
     }
 
+    public function pushSubscriptions()
+    {
+        return $this->hasMany(PushSubscription::class);
+    }
+
     public function activeAbonnement()
     {
         return $this->abonnements()
