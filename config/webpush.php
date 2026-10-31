@@ -16,7 +16,7 @@ return [
 
     'private_key' => env('VAPID_PRIVATE_KEY'),
 
-    'subject' => env('VAPID_SUBJECT', 'mailto:contact@colcampus.bj'),
+    'subject' => env('VAPID_SUBJECT', 'mailto:contact@coletubenin.lavoixdabouloussi.org'),
 
     'ttl' => (int) env('WEBPUSH_TTL', 2419200),
 
