@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Activez votre compte - ColCampus</title>
+    <title>Activez votre compte - ColEtuBenin</title>
 </head>
 
 <body style="margin: 0; padding: 0; background-color: #F4F2EF; font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
@@ -27,7 +27,7 @@
                     Bienvenue @if(!empty($userName)) {{ $userName }} @endif!
                 </h1>
                 <p style="font-size: 15px; color: #4b5563; margin: 0 0 1.75rem; line-height: 1.6;">
-                    Merci de vous être inscrit sur <strong>ColCampus</strong>. Pour des raisons de sécurité, votre compte doit être validé avant votre première connexion.
+                    Merci de vous être inscrit sur <strong>ColEtuBenin</strong>. Pour des raisons de sécurité, votre compte doit être validé avant votre première connexion.
                 </p>
 
                 {{-- Bouton d'action principale si lien présent --}}
@@ -70,7 +70,7 @@
             {{-- Footer --}}
             <div style="border-top: 1px solid #F3F4F6; padding: 1.25rem 2.5rem; background: #fafafa; text-align: center;">
                 <p style="font-size: 12px; color: #9ca3af; margin: 0;">
-                    © {{ date('Y') }} ColCampus — Tous droits réservés.
+                    © {{ date('Y') }} ColEtuBenin — Tous droits réservés.
                 </p>
             </div>
         </div>

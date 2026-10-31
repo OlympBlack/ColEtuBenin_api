@@ -34,7 +34,7 @@ class AvisMessageNotification extends Notification
         $isAudio = $this->conversationMessage->type === 'audio' || (bool) $this->conversationMessage->media_url;
 
         return [
-            'title' => $senderName . ' sur ColCampus',
+            'title' => $senderName . ' sur ColEtuBenin',
             'body' => $isAudio
                 ? '🎤 Nouveau message vocal'
                 : ($this->conversationMessage->content ?: 'Vous a envoyé un message'),

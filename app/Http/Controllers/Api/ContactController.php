@@ -42,7 +42,7 @@ class ContactController extends Controller
         ]);
 
         return response()->json([
-            'message' => 'Votre message a bien été envoyé à l’équipe ColCampus. Nous vous répondrons dans les plus brefs délais.',
+            'message' => 'Votre message a bien été envoyé à l’équipe ColEtuBenin. Nous vous répondrons dans les plus brefs délais.',
             'data' => $contact,
         ], 201);
     }

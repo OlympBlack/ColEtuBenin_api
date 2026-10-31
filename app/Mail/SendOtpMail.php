@@ -29,7 +29,7 @@ class SendOtpMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Activez votre compte ColCampus',
+            subject: 'Activez votre compte ColEtuBenin',
         );
     }
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $success ? 'Compte validé avec succès' : 'Erreur de validation' }} - ColCampus</title>
+    <title>{{ $success ? 'Compte validé avec succès' : 'Erreur de validation' }} - ColEtuBenin</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * {
@@ -99,8 +99,8 @@
                 </svg>
             </div>
             <h1>Compte validé avec succès !</h1>
-            <p>{{ $message }} Vous pouvez maintenant vous connecter à votre compte ColCampus et commencer à explorer les annonces ou publier.</p>
-            <a href="{{ $loginUrl }}" class="btn">Se connecter à ColCampus</a>
+            <p>{{ $message }} Vous pouvez maintenant vous connecter à votre compte ColEtuBenin et commencer à explorer les annonces ou publier.</p>
+            <a href="{{ $loginUrl }}" class="btn">Se connecter à ColEtuBenin</a>
         @else
             <div class="icon-wrapper icon-error">
                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -114,7 +114,7 @@
             <a href="{{ $loginUrl }}" class="btn">Aller à la page de connexion</a>
         @endif
         <div>
-            <a href="https://colcampus.lavoixdabouloussi.org" class="secondary-link">← Retourner à l'accueil ColCampus</a>
+            <a href="https://colcampus.lavoixdabouloussi.org" class="secondary-link">← Retourner à l'accueil ColEtuBenin</a>
         </div>
     </div>
 </body>
