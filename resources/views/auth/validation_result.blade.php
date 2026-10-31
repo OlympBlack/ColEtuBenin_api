@@ -114,7 +114,7 @@
             <a href="{{ $loginUrl }}" class="btn">Aller à la page de connexion</a>
         @endif
         <div>
-            <a href="https://colcampus.lavoixdabouloussi.org" class="secondary-link">← Retourner à l'accueil ColEtuBenin</a>
+            <a href="{{ config('app.frontend_url', 'https://coletubenin.lavoixdabouloussi.org') }}" class="secondary-link">← Retourner à l'accueil ColEtuBenin</a>
         </div>
     </div>
 </body>

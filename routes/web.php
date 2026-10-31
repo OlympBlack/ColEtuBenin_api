@@ -15,9 +15,9 @@ Route::get('/auth/validation/{id}/{hash}', [RegisterController::class, 'validate
     ->name('auth.validation');
 
 Route::get('/login', function () {
-    return redirect(config('app.frontend_url', 'https://colcampus.lavoixdabouloussi.org') . '/#/connexion');
+    return redirect(config('app.frontend_url', 'https://coletubenin.lavoixdabouloussi.org') . '/#/connexion');
 })->name('login');
 
 Route::get('/register', function () {
-    return redirect(config('app.frontend_url', 'https://colcampus.lavoixdabouloussi.org') . '/#/inscription');
+    return redirect(config('app.frontend_url', 'https://coletubenin.lavoixdabouloussi.org') . '/#/inscription');
 })->name('register');
