@@ -16,32 +16,22 @@ class ControleurPortefeuille extends Controller
     public function show(Request $request): JsonResponse
     {
         $user = $request->user();
-        $portefeuille = $user->portefeuillePublication;
-
-        if (!$portefeuille && $user->role === 'demarcheur') {
-            // Initialisation de secours si non existant
-            $service = new \App\Services\ServicePortefeuillePublications();
-            $portefeuille = $service->initialiserPortefeuille($user);
-        }
+        $service = new \App\Services\ServicePortefeuillePublications();
+        $resume = $service->obtenirResumePortefeuille($user);
 
         $transactions = TransactionCredit::where('user_id', $user->id)
             ->latest()
-            ->take(20)
+            ->take(30)
             ->get();
 
         $achats = AchatForfait::with('forfait')
             ->where('user_id', $user->id)
             ->latest()
-            ->take(10)
+            ->take(15)
             ->get();
 
         return response()->json([
-            'portefeuille' => [
-                'credits_restants' => $portefeuille ? $portefeuille->credits_restants : 0,
-                'credits_gratuits' => $portefeuille ? $portefeuille->credits_gratuits : 0,
-                'credits_achetes' => $portefeuille ? $portefeuille->credits_achetes : 0,
-                'credits_utilises' => $portefeuille ? $portefeuille->credits_utilises : 0,
-            ],
+            'portefeuille' => $resume,
             'transactions' => $transactions,
             'achats' => $achats,
         ]);

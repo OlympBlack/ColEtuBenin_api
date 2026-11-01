@@ -11,15 +11,16 @@ use Illuminate\Support\Facades\Storage;
 class ParametrePlateformeController extends Controller
 {
     /**
-     * Lecture publique des paramètres de la plateforme
+     * Lecture des paramètres de la plateforme
      */
-    public function show(): JsonResponse
+    public function show(Request $request): JsonResponse
     {
         $settings = ParametrePlateforme::getSettings();
+        $isAdmin = $request->user()?->isAdmin() || auth('sanctum')->user()?->isAdmin();
 
         return response()->json([
             'success' => true,
-            'data' => $settings->toPublicArray(),
+            'data' => $isAdmin ? $settings->toAdminArray() : $settings->toPublicArray(),
         ]);
     }
 
@@ -43,6 +44,10 @@ class ParametrePlateformeController extends Controller
             'signature_url' => ['nullable', 'string', 'max:500'],
             'signature_texte' => ['nullable', 'string', 'max:255'],
             'copyright_texte' => ['nullable', 'string', 'max:255'],
+            'kkiapay_public_key' => ['nullable', 'string', 'max:255'],
+            'kkiapay_private_key' => ['nullable', 'string', 'max:255'],
+            'kkiapay_secret_key' => ['nullable', 'string', 'max:255'],
+            'kkiapay_sandbox' => ['nullable'],
         ]);
 
         $settings = ParametrePlateforme::getSettings();
@@ -73,11 +78,24 @@ class ParametrePlateformeController extends Controller
             'signature_url',
             'signature_texte',
             'copyright_texte',
+            'kkiapay_public_key',
+            'kkiapay_private_key',
+            'kkiapay_secret_key',
         ];
 
         foreach ($fields as $field) {
             if ($request->has($field) && $request->input($field) !== null) {
-                $settings->{$field} = trim($request->input($field));
+                $settings->{$field} = trim((string) $request->input($field));
+            }
+        }
+
+        // Gestion explicite du booléen sandbox
+        if ($request->has('kkiapay_sandbox')) {
+            $sandboxValue = $request->input('kkiapay_sandbox');
+            if (is_string($sandboxValue)) {
+                $settings->kkiapay_sandbox = in_array(strtolower($sandboxValue), ['1', 'true', 'yes', 'on'], true);
+            } else {
+                $settings->kkiapay_sandbox = (bool) $sandboxValue;
             }
         }
 
@@ -85,8 +103,8 @@ class ParametrePlateformeController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Paramètres de la plateforme mis à jour avec succès.',
-            'data' => $settings->toPublicArray(),
+            'message' => 'Paramètres de la plateforme et clés API mis à jour avec succès.',
+            'data' => $settings->toAdminArray(),
         ]);
     }
 
@@ -111,12 +129,16 @@ class ParametrePlateformeController extends Controller
             'signature_url' => 'https://juleschrist-portfolio.vercel.app/',
             'signature_texte' => 'Conçu & développé par',
             'copyright_texte' => 'ColEtuBenin. Tous droits réservés.',
+            'kkiapay_public_key' => config('services.kkiapay.public_key', 'aa4b4f9052d511f18d492b2bdfbe5c62'),
+            'kkiapay_private_key' => config('services.kkiapay.private_key'),
+            'kkiapay_secret_key' => config('services.kkiapay.secret_key'),
+            'kkiapay_sandbox' => config('services.kkiapay.sandbox', true),
         ]);
 
         return response()->json([
             'success' => true,
             'message' => 'Les paramètres par défaut ont été restaurés.',
-            'data' => $settings->toPublicArray(),
+            'data' => $settings->toAdminArray(),
         ]);
     }
 }

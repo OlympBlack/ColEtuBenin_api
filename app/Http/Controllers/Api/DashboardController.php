@@ -192,7 +192,8 @@ class DashboardController extends Controller
     private function demarcheurDashboard($user): array
     {
         $annonces = $user->annonces()->with(['user', 'medias'])->latest()->get();
-        $portefeuille = $user->portefeuillePublication;
+        $servicePortefeuille = new \App\Services\ServicePortefeuillePublications();
+        $portefeuille = $servicePortefeuille->obtenirOuInitialiserPortefeuille($user);
         $activeAbonnement = $user->activeAbonnement()->first();
 
         return [
@@ -205,18 +206,18 @@ class DashboardController extends Controller
                     'annonces_refusees' => $annonces->where('statut_publication', 'refusee')->count(),
                     'total_vues' => $annonces->sum('vues_count'),
                     'total_messages' => $user->conversationsAsReceiver->count(),
-                    'credits_restants' => $portefeuille?->credits_restants ?? 0,
+                    'credits_restants' => $portefeuille->credits_restants,
                 ],
                 'stock' => [
                     'disponible' => $annonces->where('statut_disponibilite', 'available')->count(),
                     'occupe' => $annonces->where('statut_disponibilite', 'taken')->count(),
                     'en_attente' => $annonces->where('statut_disponibilite', 'pending')->count(),
                 ],
-                'portefeuille' => $portefeuille ? [
-                    'credits_gratuits' => $portefeuille->credits_gratuits,
-                    'credits_achetes' => $portefeuille->credits_achetes,
-                    'credits_utilises' => $portefeuille->credits_utilises,
-                    'credits_restants' => $portefeuille->credits_restants,
+                'portefeuille' => [
+                    'credits_gratuits' => (int) $portefeuille->credits_gratuits,
+                    'credits_achetes' => (int) $portefeuille->credits_achetes,
+                    'credits_utilises' => (int) $portefeuille->credits_utilises,
+                    'credits_restants' => (int) $portefeuille->credits_restants,
                     'transactions_recentes' => $user->transactionsCredits()->latest()->limit(5)->get()->map(fn($t) => [
                         'id' => $t->id,
                         'type' => $t->type,
@@ -231,12 +232,20 @@ class DashboardController extends Controller
                         'description' => $t->description,
                         'date' => $t->created_at->toISOString(),
                     ]),
-                ] : null,
+                    'achats_recents' => $user->achatsForfaits()->with('forfait')->latest()->limit(10)->get()->map(fn($a) => [
+                        'id' => $a->id,
+                        'forfait_titre' => $a->forfait?->titre ?? 'Pack',
+                        'nombre_publications' => $a->nombre_publications,
+                        'montant' => $a->montant,
+                        'reference_transaction' => $a->reference_transaction,
+                        'date' => $a->created_at->toISOString(),
+                    ]),
+                ],
                 'abonnement' => [
                     'nom_plan' => $activeAbonnement?->plan?->nom_plan ?? 'Gratuit',
                     'statut' => $activeAbonnement ? 'Pack Pro' : 'Gratuit',
-                    'quota_total' => $portefeuille ? ($portefeuille->credits_gratuits + $portefeuille->credits_achetes) : 2,
-                    'quota_restante' => $portefeuille ? $portefeuille->credits_restants : 0,
+                    'quota_total' => $portefeuille->credits_gratuits + $portefeuille->credits_achetes,
+                    'quota_restante' => $portefeuille->credits_restants,
                 ],
             ],
         ];
@@ -245,6 +254,8 @@ class DashboardController extends Controller
     private function boutiqueDashboard($user): array
     {
         $publicites = $user->publicitesBoutiques()->latest()->get();
+        $servicePortefeuille = new \App\Services\ServicePortefeuillePublications();
+        $portefeuille = $servicePortefeuille->obtenirOuInitialiserPortefeuille($user);
 
         return [
             'boutique' => [
@@ -252,6 +263,35 @@ class DashboardController extends Controller
                 'statistiques' => [
                     'vues_total' => $publicites->sum('vues_count'),
                     'clics_total' => $publicites->sum('clics_count'),
+                    'credits_restants' => $portefeuille->credits_restants,
+                ],
+                'portefeuille' => [
+                    'credits_gratuits' => (int) $portefeuille->credits_gratuits,
+                    'credits_achetes' => (int) $portefeuille->credits_achetes,
+                    'credits_utilises' => (int) $portefeuille->credits_utilises,
+                    'credits_restants' => (int) $portefeuille->credits_restants,
+                    'transactions_recentes' => $user->transactionsCredits()->latest()->limit(5)->get()->map(fn($t) => [
+                        'id' => $t->id,
+                        'type' => $t->type,
+                        'montant' => $t->montant,
+                        'description' => $t->description,
+                        'created_at' => $t->created_at->toISOString(),
+                    ]),
+                    'historique' => $user->transactionsCredits()->latest()->limit(20)->get()->map(fn($t) => [
+                        'id' => $t->id,
+                        'type' => $t->type,
+                        'montant' => $t->montant,
+                        'description' => $t->description,
+                        'date' => $t->created_at->toISOString(),
+                    ]),
+                    'achats_recents' => $user->achatsForfaits()->with('forfait')->latest()->limit(10)->get()->map(fn($a) => [
+                        'id' => $a->id,
+                        'forfait_titre' => $a->forfait?->titre ?? 'Pack',
+                        'nombre_publications' => $a->nombre_publications,
+                        'montant' => $a->montant,
+                        'reference_transaction' => $a->reference_transaction,
+                        'date' => $a->created_at->toISOString(),
+                    ]),
                 ],
             ],
         ];

@@ -15,12 +15,20 @@ class KkiapayService
 
     public function __construct()
     {
-        $this->publicKey  = config('services.kkiapay.public_key');
-        $this->secretKey  = config('services.kkiapay.secret_key');
-        $this->privateKey = config('services.kkiapay.private_key');
-        $this->sandbox    = config('services.kkiapay.sandbox', true); // ← ajouté
+        try {
+            $settings = \App\Models\ParametrePlateforme::getSettings();
+            $this->publicKey  = $settings->getEffectiveKkiapayPublicKey();
+            $this->secretKey  = $settings->getEffectiveKkiapaySecretKey();
+            $this->privateKey = $settings->getEffectiveKkiapayPrivateKey();
+            $this->sandbox    = $settings->isEffectiveKkiapaySandbox();
+        } catch (\Throwable $e) {
+            $this->publicKey  = (string) config('services.kkiapay.public_key', 'aa4b4f9052d511f18d492b2bdfbe5c62');
+            $this->secretKey  = (string) config('services.kkiapay.secret_key', '');
+            $this->privateKey = (string) config('services.kkiapay.private_key', '');
+            $this->sandbox    = (bool) config('services.kkiapay.sandbox', true);
+        }
 
-        // URL définie une seule fois ici
+        // URL définie dynamiquement selon le mode configuré par l'administrateur
         $this->baseUrl = $this->sandbox
             ? 'https://api-sandbox.kkiapay.me'
             : 'https://api.kkiapay.me';

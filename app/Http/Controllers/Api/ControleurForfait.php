@@ -45,12 +45,18 @@ class ControleurForfait extends Controller
         try {
             $achat = $this->serviceForfait->validerAchatKkiapay($user, $forfait, $request->transaction_id);
 
+            $servicePortefeuille = new \App\Services\ServicePortefeuillePublications();
+            $resume = $servicePortefeuille->obtenirResumePortefeuille($user);
+
             return response()->json([
-                'message' => 'Forfait pack activé avec succès.',
-                'achat' => $achat
+                'success' => true,
+                'message' => "Pack « {$forfait->titre} » ({$forfait->nombre_publications} crédits) activé avec succès !",
+                'achat' => $achat,
+                'portefeuille' => $resume,
             ]);
         } catch (\Exception $e) {
             return response()->json([
+                'success' => false,
                 'message' => $e->getMessage()
             ], 400);
         }

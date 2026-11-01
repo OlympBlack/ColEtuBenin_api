@@ -46,19 +46,29 @@ class ServiceForfaitPublications
 
     public function validerAchatKkiapay(User $user, ForfaitPublication $forfait, string $transactionId)
     {
-        // ← Utilise $this->kkiapay au lieu de new KkiapayService()
+        // 1. Idempotence : si la transaction a déjà été enregistrée et validée, on la retourne directement
+        $achatExistant = AchatForfait::where('reference_transaction', $transactionId)
+            ->where('statut_paiement', 'valide')
+            ->first();
+
+        if ($achatExistant) {
+            return $achatExistant->load('forfait');
+        }
+
+        // 2. Vérification auprès de l'API Kkiapay (via les clés dynamiques de la plateforme)
         $details = $this->kkiapay->verifyTransaction($transactionId);
 
         if (!$details || ($details['status'] ?? '') !== 'SUCCESS') {
-            throw new \Exception("La transaction Kkiapay n'a pas pu être vérifiée ou a échoué.");
+            throw new \Exception("La transaction Kkiapay n'a pas pu être vérifiée ou a échoué. Veuillez vérifier auprès de votre opérateur.");
         }
 
-        // Vérification de sécurité critique : s'assurer que le montant payé correspond au prix du forfait
-        $montantPaye = isset($details['amount']) ? (int)$details['amount'] : 0;
-        if ($montantPaye < $forfait->prix) {
-            throw new \Exception("Le montant de la transaction ({$montantPaye}) est inférieur au prix du forfait ({$forfait->prix}).");
+        // 3. Vérification de sécurité critique : le montant payé doit correspondre au prix du pack
+        $montantPaye = isset($details['amount']) ? (int) $details['amount'] : 0;
+        if ($montantPaye < (int) $forfait->prix) {
+            throw new \Exception("Le montant de la transaction ({$montantPaye} FCFA) est inférieur au montant requis ({$forfait->prix} FCFA).");
         }
 
+        // 4. Enregistrement de l'achat et mise à jour transparente du portefeuille
         return $this->acheterForfait($user, $forfait, $transactionId, 'kkiapay');
     }
 }
