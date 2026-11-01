@@ -34,46 +34,62 @@ class KkiapayService
         ]);
     }
 
-    public function verifyTransaction(string $transactionId): ?array
+    public function verifyTransaction(string $transactionId, int $maxAttempts = 4): ?array
     {
         $url = "{$this->baseUrl}/api/v1/transactions/status";
 
-        try {
-            $response = Http::withHeaders([
-                'X-API-KEY'     => $this->publicKey,
-                'X-PRIVATE-KEY' => $this->privateKey,
-                'X-SECRET-KEY'  => $this->secretKey,
-                'Accept'        => 'application/json',
-            ])->post($url, [
-                'transactionId' => $transactionId,
-            ]);
+        for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
+            try {
+                $response = Http::withHeaders([
+                    'X-API-KEY'     => $this->publicKey,
+                    'X-PRIVATE-KEY' => $this->privateKey,
+                    'X-SECRET-KEY'  => $this->secretKey,
+                    'Accept'        => 'application/json',
+                ])->post($url, [
+                    'transactionId' => $transactionId,
+                ]);
 
-            Log::info('Kkiapay verify response', [
-                'transactionId' => $transactionId,
-                'url'           => $url,
-                'sandbox'       => $this->sandbox,
-                'status'        => $response->status(),
-                'body'          => $response->json(),
-            ]);
+                Log::info("Kkiapay verify response (tentative {$attempt}/{$maxAttempts})", [
+                    'transactionId' => $transactionId,
+                    'url'           => $url,
+                    'sandbox'       => $this->sandbox,
+                    'status'        => $response->status(),
+                    'body'          => $response->json(),
+                ]);
 
-            if ($response->successful()) {
-                $data = $response->json();
-                if (isset($data['status']) && $data['status'] === 'SUCCESS') {
-                    return $data;
+                if ($response->successful()) {
+                    $data = $response->json();
+                    $status = $data['status'] ?? null;
+
+                    if ($status === 'SUCCESS') {
+                        return $data;
+                    }
+
+                    // Si la transaction Mobile Money est encore en cours de confirmation, on réessaie
+                    if ($status === 'PENDING' && $attempt < $maxAttempts) {
+                        Log::info("Kkiapay transaction {$transactionId} encore PENDING, nouvelle vérification dans 2s...");
+                        sleep(2);
+                        continue;
+                    }
+                }
+
+                if ($attempt === $maxAttempts) {
+                    Log::error('Kkiapay verification failed after max attempts', [
+                        'transactionId' => $transactionId,
+                        'httpStatus'    => $response->status(),
+                        'response'      => $response->json(),
+                    ]);
+                }
+            } catch (\Exception $e) {
+                Log::error("Kkiapay exception tentative {$attempt}: " . $e->getMessage());
+                if ($attempt < $maxAttempts) {
+                    sleep(1);
+                    continue;
                 }
             }
-
-            Log::error('Kkiapay verification failed', [
-                'transactionId' => $transactionId,
-                'httpStatus'    => $response->status(),
-                'response'      => $response->json(),
-            ]);
-            return null;
-
-        } catch (\Exception $e) {
-            Log::error('Kkiapay exception: ' . $e->getMessage());
-            return null;
         }
+
+        return null;
     }
 
     public function getPublicKey(): string
