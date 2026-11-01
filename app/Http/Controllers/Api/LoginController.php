@@ -17,7 +17,13 @@ class LoginController extends Controller
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
 
-            if (!$user->is_valide) {
+            // Les administrateurs ne sont jamais soumis à la validation d'email
+            if ($user->role === 'admin') {
+                if (!$user->is_valide) {
+                    $user->is_valide = true;
+                    $user->save();
+                }
+            } elseif (!$user->is_valide) {
                 Auth::logout();
 
                 return response()->json([
