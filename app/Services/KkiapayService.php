@@ -7,34 +7,34 @@ use Illuminate\Support\Facades\Log;
 
 class KkiapayService
 {
-    protected $publicKey;
-    protected $secretKey;
-    protected $privateKey;
-    protected $sandbox;
-    protected $baseUrl;
+    protected string $publicKey;
+    protected string $secretKey;
+    protected string $privateKey;
+    protected bool $sandbox;
+    protected string $baseUrl;
 
     public function __construct()
     {
-        try {
-            $settings = \App\Models\ParametrePlateforme::getSettings();
-            $this->publicKey  = $settings->getEffectiveKkiapayPublicKey();
-            $this->secretKey  = $settings->getEffectiveKkiapaySecretKey();
-            $this->privateKey = $settings->getEffectiveKkiapayPrivateKey();
-            $this->sandbox    = $settings->isEffectiveKkiapaySandbox();
-        } catch (\Throwable $e) {
-            $this->publicKey  = (string) config('services.kkiapay.public_key', 'aa4b4f9052d511f18d492b2bdfbe5c62');
-            $this->secretKey  = (string) config('services.kkiapay.secret_key', '');
-            $this->privateKey = (string) config('services.kkiapay.private_key', '');
-            $this->sandbox    = (bool) config('services.kkiapay.sandbox', true);
-        }
+        // Lecture directe depuis .env via config/services.php
+        $this->publicKey  = (string) config('services.kkiapay.public_key', '');
+        $this->secretKey  = (string) config('services.kkiapay.secret_key', '');
+        $this->privateKey = (string) config('services.kkiapay.private_key', '');
+        $this->sandbox    = filter_var(config('services.kkiapay.sandbox', true), FILTER_VALIDATE_BOOLEAN);
 
-        // URL définie dynamiquement selon le mode configuré par l'administrateur
         $this->baseUrl = $this->sandbox
             ? 'https://api-sandbox.kkiapay.me'
             : 'https://api.kkiapay.me';
+
+        Log::info('KkiapayService initialisé', [
+            'sandbox'        => $this->sandbox,
+            'baseUrl'        => $this->baseUrl,
+            'public_key_set' => !empty($this->publicKey),
+            'private_key_set'=> !empty($this->privateKey),
+            'secret_key_set' => !empty($this->secretKey),
+        ]);
     }
 
-    public function verifyTransaction(string $transactionId)
+    public function verifyTransaction(string $transactionId): ?array
     {
         $url = "{$this->baseUrl}/api/v1/transactions/{$transactionId}/status";
 
@@ -46,8 +46,8 @@ class KkiapayService
 
             Log::info('Kkiapay verify response', [
                 'transactionId' => $transactionId,
-                'url'           => $url,           // ← pour confirmer l'URL utilisée
-                'sandbox'       => $this->sandbox, // ← pour confirmer le mode
+                'url'           => $url,
+                'sandbox'       => $this->sandbox,
                 'status'        => $response->status(),
                 'body'          => $response->json(),
             ]);
@@ -61,6 +61,7 @@ class KkiapayService
 
             Log::error('Kkiapay verification failed', [
                 'transactionId' => $transactionId,
+                'httpStatus'    => $response->status(),
                 'response'      => $response->json(),
             ]);
             return null;
@@ -69,5 +70,15 @@ class KkiapayService
             Log::error('Kkiapay exception: ' . $e->getMessage());
             return null;
         }
+    }
+
+    public function getPublicKey(): string
+    {
+        return $this->publicKey;
+    }
+
+    public function isSandbox(): bool
+    {
+        return $this->sandbox;
     }
 }
