@@ -36,13 +36,17 @@ class KkiapayService
 
     public function verifyTransaction(string $transactionId): ?array
     {
-        $url = "{$this->baseUrl}/api/v1/transactions/{$transactionId}/status";
+        $url = "{$this->baseUrl}/api/v1/transactions/status";
 
         try {
             $response = Http::withHeaders([
-                'x-private-key' => $this->privateKey,
+                'X-API-KEY'     => $this->publicKey,
+                'X-PRIVATE-KEY' => $this->privateKey,
+                'X-SECRET-KEY'  => $this->secretKey,
                 'Accept'        => 'application/json',
-            ])->get($url);
+            ])->post($url, [
+                'transactionId' => $transactionId,
+            ]);
 
             Log::info('Kkiapay verify response', [
                 'transactionId' => $transactionId,
