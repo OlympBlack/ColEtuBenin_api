@@ -104,6 +104,11 @@ class User extends Authenticatable
         return $this->hasMany(TransactionCredit::class);
     }
 
+    public function achatsForfaits()
+    {
+        return $this->hasMany(AchatForfait::class, 'user_id');
+    }
+
     public function conversationsAsSender()
     {
         return $this->hasMany(Conversation::class, 'sender_id');
