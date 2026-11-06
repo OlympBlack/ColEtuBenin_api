@@ -34,7 +34,7 @@ class ManagedAnnonceController extends Controller
         }
 
         $annonce = $user->annonces()->create($this->announcementPayload($validated, $request->universiteId()));
-        $this->storeAnnouncementMedia($annonce, $request->file('medias', []));
+        $this->storeAnnouncementMedia($annonce, $request->file('medias', []), $request->file('panoramicMedias', []));
 
         return response()->json([
             'message' => 'Annonce publiee avec succes.',
@@ -57,7 +57,9 @@ class ManagedAnnonceController extends Controller
         $annonce->update($this->announcementPayload($validated, $request->universiteId()));
 
         if ($request->hasFile('medias')) {
-            $this->replaceAnnouncementMedia($annonce, $request->file('medias', []));
+            $this->replaceAnnouncementMedia($annonce, $request->file('medias', []), $request->file('panoramicMedias', []));
+        } elseif ($request->hasFile('panoramicMedias')) {
+            $this->storeAnnouncementMedia($annonce, [], $request->file('panoramicMedias', []));
         }
 
         return response()->json([
@@ -137,7 +139,7 @@ class ManagedAnnonceController extends Controller
         ];
     }
 
-    protected function storeAnnouncementMedia(Annonce $annonce, array $medias): void
+    protected function storeAnnouncementMedia(Annonce $annonce, array $medias, array $panoramicMedias = []): void
     {
         foreach ($medias as $media) {
             $annonce->medias()->create([
@@ -145,9 +147,16 @@ class ManagedAnnonceController extends Controller
                 'est_panoramique_3d' => false,
             ]);
         }
+
+        foreach ($panoramicMedias as $media) {
+            $annonce->medias()->create([
+                'url_fichier' => $media->store('annonces', 'public'),
+                'est_panoramique_3d' => true,
+            ]);
+        }
     }
 
-    private function replaceAnnouncementMedia(Annonce $annonce, array $medias): void
+    private function replaceAnnouncementMedia(Annonce $annonce, array $medias, array $panoramicMedias = []): void
     {
         foreach ($annonce->medias as $media) {
             if ($media->url_fichier) {
@@ -156,6 +165,6 @@ class ManagedAnnonceController extends Controller
         }
 
         $annonce->medias()->delete();
-        $this->storeAnnouncementMedia($annonce, $medias);
+        $this->storeAnnouncementMedia($annonce, $medias, $panoramicMedias);
     }
 }
