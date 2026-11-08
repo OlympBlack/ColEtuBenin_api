@@ -45,18 +45,10 @@ class AnnonceSeeder extends Seeder
                 'type_chambre' => 'ENTREE_COUCHEE_SANITAIRE',
                 'statut_disponibilite' => 'available',
                 'medias' => [
-                    [
-                        'url_fichier' => 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80',
-                        'est_panoramique_3d' => false,
-                    ],
-                    [
-                        'url_fichier' => 'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1200&q=80',
-                        'est_panoramique_3d' => true,
-                    ],
-                    [
-                        'url_fichier' => 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80',
-                        'est_panoramique_3d' => false,
-                    ],
+                    'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80',
+                    'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1200&q=80',
+                    'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80',
+                    'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
                 ],
             ],
             [
@@ -73,18 +65,9 @@ class AnnonceSeeder extends Seeder
                 'type_chambre' => 'ENTREE_COUCHEE_ORDINAIRE',
                 'statut_disponibilite' => 'available',
                 'medias' => [
-                    [
-                        'url_fichier' => 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80',
-                        'est_panoramique_3d' => true,
-                    ],
-                    [
-                        'url_fichier' => 'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80',
-                        'est_panoramique_3d' => false,
-                    ],
-                    [
-                        'url_fichier' => 'https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=1200&q=80',
-                        'est_panoramique_3d' => false,
-                    ],
+                    'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80',
+                    'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80',
+                    'https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=1200&q=80',
                 ],
             ],
             [
@@ -123,6 +106,7 @@ class AnnonceSeeder extends Seeder
                 'medias' => [
                     'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80',
                     'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80',
+                    'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
                 ],
             ],
             [
