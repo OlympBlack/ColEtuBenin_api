@@ -429,12 +429,12 @@ class AnnonceSeeder extends Seeder
             foreach ($medias as $media) {
                 if (is_array($media)) {
                     $annonce->medias()->create([
-                        'url_fichier'       => $media['url_fichier'],
+                        'url_fichier'        => $media['url_fichier'],
                         'est_panoramique_3d' => $media['est_panoramique_3d'] ?? false,
                     ]);
                 } else {
                     $annonce->medias()->create([
-                        'url_fichier'       => $media,
+                        'url_fichier'        => $media,
                         'est_panoramique_3d' => false,
                     ]);
                 }
