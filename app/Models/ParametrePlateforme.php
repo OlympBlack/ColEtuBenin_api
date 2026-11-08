@@ -40,10 +40,10 @@ class ParametrePlateforme extends Model
         $settings = static::first();
         if (!$settings) {
             $settings = static::create([
-                'nom_plateforme' => 'ColEtuBenin',
+                'nom_plateforme' => 'ColoCampus',
                 'slogan' => 'La plateforme de logement et de colocation étudiante autour des campus du Bénin',
-                'description' => 'ColEtuBenin met en relation étudiants, bailleurs et démarcheurs autour des quatre grandes universités publiques du Bénin : UAC, UNA, UNSTIM et UP. Trouvez ou proposez facilement une chambre ou une colocation près de votre campus.',
-                'logo_url' => '/assets/images/logo_colcampus.png',
+                'description' => 'ColoCampus met en relation étudiants, bailleurs et démarcheurs autour des quatre grandes universités publiques du Bénin : UAC, UNA, UNSTIM et UP. Trouvez ou proposez facilement une chambre ou une colocation près de votre campus.',
+                'logo_url' => '/assets/images/colocampus_logo_dark.png',
                 'campus_localisation' => 'Campus UAC, UNA, UNSTIM & UP • Bénin',
                 'telephone' => '+229 01 54 47 00 02',
                 'whatsapp' => '+229 01 54 47 00 02',
@@ -52,7 +52,7 @@ class ParametrePlateforme extends Model
                 'signature_auteur' => 'GBASSI Jules-christ',
                 'signature_url' => 'https://juleschrist-portfolio.vercel.app/',
                 'signature_texte' => 'Conçu & développé par',
-                'copyright_texte' => 'ColEtuBenin. Tous droits réservés.',
+                'copyright_texte' => 'ColoCampus. Tous droits réservés.',
                 'kkiapay_public_key' => config('services.kkiapay.public_key', 'aa4b4f9052d511f18d492b2bdfbe5c62'),
                 'kkiapay_private_key' => config('services.kkiapay.private_key'),
                 'kkiapay_secret_key' => config('services.kkiapay.secret_key'),
