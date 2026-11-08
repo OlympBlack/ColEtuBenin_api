@@ -32,6 +32,9 @@ class StoreAnnonceRequest extends FormRequest
             'statut_disponibilite' => ['nullable', 'in:available,taken,pending'],
             'medias' => ['nullable', 'array', 'max:7'],
             'medias.*' => ['file', 'mimes:jpg,jpeg,png,webp,mp4', 'max:51200'],
+            'media_order' => ['nullable', 'array', 'max:10'],
+            'media_order.*' => ['string'],
+            'media_order_empty' => ['nullable'],
         ];
     }
 

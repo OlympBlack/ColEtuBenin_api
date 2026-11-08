@@ -56,7 +56,9 @@ class ManagedAnnonceController extends Controller
 
         $annonce->update($this->announcementPayload($validated, $request->universiteId()));
 
-        if ($request->hasFile('medias')) {
+        if ($request->has('media_order') || $request->has('media_order_empty')) {
+            $this->syncAnnouncementMedia($annonce, $request->input('media_order', []), $request->file('medias', []));
+        } elseif ($request->hasFile('medias')) {
             $this->replaceAnnouncementMedia($annonce, $request->file('medias', []));
         }
 
@@ -169,5 +171,67 @@ class ManagedAnnonceController extends Controller
 
         $annonce->medias()->delete();
         $this->storeAnnouncementMedia($annonce, $medias);
+    }
+
+    protected function syncAnnouncementMedia(Annonce $annonce, array $mediaOrder, array $newUploadedFiles = []): void
+    {
+        $existingMedias = $annonce->medias()->get()->keyBy('id');
+
+        $storedNewPaths = [];
+        foreach ($newUploadedFiles as $index => $file) {
+            $storedNewPaths[$index] = $file->store('annonces', 'public');
+        }
+
+        $isBinome = $annonce->type_annonce === 'RECHERCHE_BINOME';
+        $retainedIds = [];
+        $finalItems = [];
+
+        foreach ($mediaOrder as $token) {
+            if (!is_string($token)) {
+                continue;
+            }
+            if (str_starts_with($token, 'existing:')) {
+                $id = (int) substr($token, strlen('existing:'));
+                if (isset($existingMedias[$id])) {
+                    $media = $existingMedias[$id];
+                    if ($isBinome && str_ends_with(strtolower($media->url_fichier), '.mp4')) {
+                        continue;
+                    }
+                    $retainedIds[] = $id;
+                    $finalItems[] = [
+                        'url_fichier' => $media->url_fichier,
+                        'est_panoramique_3d' => false,
+                    ];
+                }
+            } elseif (str_starts_with($token, 'new:')) {
+                $index = (int) substr($token, strlen('new:'));
+                if (isset($storedNewPaths[$index])) {
+                    $path = $storedNewPaths[$index];
+                    if ($isBinome && str_ends_with(strtolower($path), '.mp4')) {
+                        continue;
+                    }
+                    $finalItems[] = [
+                        'url_fichier' => $path,
+                        'est_panoramique_3d' => false,
+                    ];
+                }
+            }
+        }
+
+        // Supprimer du disque les anciens medias qui ne sont plus retenus
+        foreach ($existingMedias as $id => $media) {
+            if (!in_array($id, $retainedIds, true)) {
+                if ($media->url_fichier && !str_starts_with($media->url_fichier, 'http://') && !str_starts_with($media->url_fichier, 'https://')) {
+                    Storage::disk('public')->delete($media->url_fichier);
+                }
+            }
+        }
+
+        // Remplacer les enregistrements en base dans l'ordre exact demande
+        $annonce->medias()->delete();
+
+        foreach ($finalItems as $item) {
+            $annonce->medias()->create($item);
+        }
     }
 }
