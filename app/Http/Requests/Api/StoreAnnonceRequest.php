@@ -30,10 +30,8 @@ class StoreAnnonceRequest extends FormRequest
             'type_chambre' => ['nullable', 'string', 'max:50'],
             'nombre_places' => ['nullable', 'integer', 'min:1', 'max:50'],
             'statut_disponibilite' => ['nullable', 'in:available,taken,pending'],
-            'medias' => ['nullable', 'array', 'max:6'],
-            'medias.*' => ['file', 'image', 'mimes:jpg,jpeg,png,webp'],
-            'panoramicMedias' => ['nullable', 'array', 'max:6'],
-            'panoramicMedias.*' => ['file', 'image', 'mimes:jpg,jpeg,png,webp'],
+            'medias' => ['nullable', 'array', 'max:7'],
+            'medias.*' => ['file', 'mimes:jpg,jpeg,png,webp,mp4', 'max:51200'],
         ];
     }
 
@@ -51,6 +49,15 @@ class StoreAnnonceRequest extends FormRequest
                 $existe = $universite->quartiers()->where('nom', $quartier)->exists();
                 if (!$existe) {
                     $validator->errors()->add('quartier', 'Ce quartier n\'appartient pas à l\'université indiquée.');
+                }
+            }
+
+            if ($this->input('type_annonce') === 'RECHERCHE_BINOME' && $this->hasFile('medias')) {
+                foreach ($this->file('medias', []) as $file) {
+                    if (str_ends_with(strtolower($file->getClientOriginalName() ?? ''), '.mp4')) {
+                        $validator->errors()->add('medias', 'Une recherche de binôme ne peut pas contenir de vidéo.');
+                        break;
+                    }
                 }
             }
         });

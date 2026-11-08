@@ -52,12 +52,8 @@ class ControleurAnnonce extends ManagedAnnonceController
             $annonce = $this->servicePublication->publierAvecCredits($user, $payload);
 
             // 3. Gestion des médias
-            if ($request->hasFile('medias') || $request->hasFile('panoramicMedias')) {
-                $this->storeAnnouncementMedia(
-                    $annonce,
-                    $request->file('medias', []),
-                    $request->file('panoramicMedias', [])
-                );
+            if ($request->hasFile('medias')) {
+                $this->storeAnnouncementMedia($annonce, $request->file('medias'));
             }
 
             return response()->json([
