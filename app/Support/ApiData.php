@@ -307,6 +307,10 @@ class ApiData
         return [
             'id' => $publicite->id,
             'titre_promo' => $publicite->titre_promo,
+            'nom_produit' => $publicite->titre_promo,
+            'prix' => $publicite->prix ? (int) $publicite->prix : null,
+            'description' => $publicite->description,
+            'categorie' => $publicite->categorie ?: ($publicite->user?->profilBoutique?->categorie ?: 'Équipements & Services'),
             'url_image_banniere' => self::fileUrl($publicite->url_image_banniere),
             'lien_action' => $publicite->lien_action,
             'quartier_cible' => $publicite->quartier_cible,
@@ -314,9 +318,13 @@ class ApiData
             'clics_count' => (int) $publicite->clics_count,
             'created_at' => $publicite->created_at?->toIso8601String(),
             'boutique' => [
-                'nom_boutique' => $publicite->user?->profilBoutique?->nom_boutique,
+                'user_id' => $publicite->user_id,
+                'nom_boutique' => $publicite->user?->profilBoutique?->nom_boutique ?: ($publicite->user?->name ?: 'Boutique Partenaire'),
                 'categorie' => $publicite->user?->profilBoutique?->categorie,
-                'logo_url' => self::fileUrl($publicite->user?->profilBoutique?->logo_url),
+                'logo_url' => self::fileUrl($publicite->user?->profilBoutique?->logo_url) ?: self::fileUrl($publicite->user?->photo_profil),
+                'telephone' => $publicite->user?->telephone,
+                'adresse_physique' => $publicite->user?->profilBoutique?->adresse_physique,
+                'is_verified' => (bool) ($publicite->user?->is_verified || $publicite->user?->statut_verification === 'verifie'),
             ],
         ];
     }

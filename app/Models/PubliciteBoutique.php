@@ -11,6 +11,9 @@ class PubliciteBoutique extends Model
     protected $fillable = [
         'user_id',
         'titre_promo',
+        'prix',
+        'description',
+        'categorie',
         'url_image_banniere',
         'lien_action',
         'quartier_cible',
@@ -21,6 +24,7 @@ class PubliciteBoutique extends Model
     protected function casts(): array
     {
         return [
+            'prix' => 'integer',
             'vues_count' => 'integer',
             'clics_count' => 'integer',
         ];

@@ -21,15 +21,18 @@ class ManagedPubliciteController extends Controller
 
         $publicite = $user->publicitesBoutiques()->create([
             'titre_promo' => $validated['titre_promo'],
+            'prix' => isset($validated['prix']) ? (int) $validated['prix'] : null,
+            'description' => $validated['description'] ?? null,
+            'categorie' => $validated['categorie'] ?? ($user->profilBoutique?->categorie ?? 'Équipements & Services'),
             'url_image_banniere' => $request->file('banniere')->store('publicites', 'public'),
-            'lien_action' => $validated['lien_action'],
+            'lien_action' => $validated['lien_action'] ?? ('#/boutiques'),
             'quartier_cible' => $validated['quartier_cible'] ?? null,
             'vues_count' => 0,
             'clics_count' => 0,
         ]);
 
         return response()->json([
-            'message' => 'Banniere publicitaire creee avec succes.',
+            'message' => 'Article publié avec succès sur l\'e-shop boutique.',
             'data' => ApiData::publicite($publicite->fresh(['user.profilBoutique'])),
         ], 201);
     }

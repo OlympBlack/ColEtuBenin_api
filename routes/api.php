@@ -33,6 +33,7 @@ Route::get('/push/public-key', [PushSubscriptionController::class, 'publicKey'])
 Route::get('/universites', [\App\Http\Controllers\Api\UniversiteController::class, 'index']);
 Route::get('/quartiers', [\App\Http\Controllers\Api\QuartierController::class, 'index']);
 Route::get('/publicites-boutiques', [PubliciteBoutiqueController::class, 'index']);
+Route::get('/publicites-boutiques/{publicite}', [PubliciteBoutiqueController::class, 'show']);
 Route::post('/publicites-boutiques/{publicite}/click', [PubliciteBoutiqueController::class, 'click']);
 
 // Collections publiques
@@ -69,6 +70,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::match(['put', 'patch'], '/avis/{avis}', [AvisController::class, 'update']);
     Route::delete('/avis/{avis}', [AvisController::class, 'destroy']);
     Route::post('/avis/{avis}/contact', [AvisController::class, 'contact']);
+    Route::post('/publicites-boutiques/{publicite}/contact', [PubliciteBoutiqueController::class, 'contact']);
 
     // Messagerie & discussions (accessible aux participants de la conversation)
     Route::get('/conversations/{conversation}', [AnnonceMessageController::class, 'showConversation']);
