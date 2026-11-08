@@ -95,6 +95,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/stats', [\App\Http\Controllers\Api\AdminController::class, 'stats']);
         Route::get('/users', [\App\Http\Controllers\Api\AdminController::class, 'users']);
         Route::patch('/users/{user}/toggle-validation', [\App\Http\Controllers\Api\AdminController::class, 'toggleUserValidation']);
+        Route::post('/users/{user}/credits', [\App\Http\Controllers\Api\AdminController::class, 'giveCredits']);
         Route::delete('/users/{user}', [\App\Http\Controllers\Api\AdminController::class, 'deleteUser']);
         Route::get('/annonces', [\App\Http\Controllers\Api\AdminController::class, 'annonces']);
         Route::delete('/annonces/{annonce}', [\App\Http\Controllers\Api\AdminController::class, 'deleteAnnonce']);

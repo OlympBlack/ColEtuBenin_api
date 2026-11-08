@@ -47,6 +47,7 @@ class ApiData
             'is_verified' => (bool) $user->is_verified,
             'is_valide' => (bool) ($user->is_valide ?? false),
             'profile_completed' => (bool) $user->profile_completed,
+            'credits_restants' => (int) ($user->portefeuillePublication?->credits_restants ?? 0),
             'statut_verification' => $user->statut_verification,
             'commentaire_admin' => $user->commentaire_admin,
             'documents_identite' => $user->documentsIdentite

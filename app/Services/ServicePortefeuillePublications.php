@@ -138,6 +138,35 @@ class ServicePortefeuillePublications
     }
 
     /**
+     * Attribuer manuellement des crédits par un administrateur
+     */
+    public function attribuerCreditsAdmin(User $user, int $nombre, ?string $motif = null, ?User $admin = null): PortefeuillePublication
+    {
+        return DB::transaction(function () use ($user, $nombre, $motif, $admin) {
+            $portefeuille = $this->obtenirOuInitialiserPortefeuille($user);
+
+            $portefeuille->increment('credits_achetes', $nombre);
+
+            $adminName = $admin ? (trim(($admin->prenoms ?? '') . ' ' . ($admin->name ?? '')) ?: 'L\'administrateur') : 'L\'administration';
+            $description = $motif
+                ? "Octroi par {$adminName} : {$motif} (+{$nombre} crédits)"
+                : "Octroi direct de {$nombre} crédit(s) par {$adminName}";
+
+            TransactionCredit::create([
+                'user_id' => $user->id,
+                'type' => 'GRATUIT',
+                'montant' => $nombre,
+                'source_type' => 'AdminAllocation',
+                'source_id' => $admin?->id,
+                'description' => $description,
+            ]);
+
+            $portefeuille->refresh();
+            return $portefeuille;
+        });
+    }
+
+    /**
      * Résumé complet et calculs transparents du portefeuille
      */
     public function obtenirResumePortefeuille(User $user): array

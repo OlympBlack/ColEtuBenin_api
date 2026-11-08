@@ -23,18 +23,22 @@ class ManagedAnnonceController extends Controller
         }
 
         if ($user->role === 'demarcheur') {
-            $activeAbonnement = $user->activeAbonnement()->first();
-            $quotaTotal = $activeAbonnement?->plan?->limite_annonces ?? 2;
-
-            if ($user->annonces()->count() >= $quotaTotal) {
+            $servicePortefeuille = new \App\Services\ServicePortefeuillePublications();
+            $portefeuille = $servicePortefeuille->obtenirOuInitialiserPortefeuille($user);
+            if ($portefeuille->credits_restants <= 0) {
                 return response()->json([
-                    'message' => 'Votre quota d annonces est atteint. Passez au Pack Pro ou archivez une annonce existante.',
+                    'message' => 'Votre quota de publication est épuisé (0 crédit restant). Rechargez vos crédits ou contactez l\'administration.',
                 ], 403);
             }
         }
 
         $annonce = $user->annonces()->create($this->announcementPayload($validated, $request->universiteId()));
         $this->storeAnnouncementMedia($annonce, $request->file('medias', []));
+
+        if ($user->role === 'demarcheur') {
+            $servicePortefeuille = new \App\Services\ServicePortefeuillePublications();
+            $servicePortefeuille->utiliserCredit($user, $annonce->id);
+        }
 
         return response()->json([
             'message' => 'Annonce publiee avec succes.',

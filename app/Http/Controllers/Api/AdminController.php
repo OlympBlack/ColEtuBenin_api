@@ -226,5 +226,38 @@ class AdminController extends Controller
             'message' => 'Le compte utilisateur a été supprimé avec succès.',
         ]);
     }
+
+    /**
+     * Attribuer manuellement des crédits de publication à un utilisateur.
+     */
+    public function giveCredits(Request $request, User $user, \App\Services\ServicePortefeuillePublications $servicePortefeuille): JsonResponse
+    {
+        $validated = $request->validate([
+            'credits' => ['required', 'integer', 'min:1', 'max:1000'],
+            'motif' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $nombre = (int) $validated['credits'];
+        $motif = $validated['motif'] ?? null;
+        $admin = $request->user();
+
+        $portefeuille = $servicePortefeuille->attribuerCreditsAdmin($user, $nombre, $motif, $admin);
+        $nouveauTotal = (int) $portefeuille->credits_restants;
+
+        // Notification envoyée directement à l'utilisateur (BD, Pusher Broadcast, WebPush)
+        $user->notify(new \App\Notifications\CreditsAllouesNotification($nombre, $nouveauTotal, $motif));
+
+        $userName = trim(($user->prenoms ?? '') . ' ' . ($user->name ?? '')) ?: $user->email;
+
+        return response()->json([
+            'message' => "{$nombre} crédit(s) attribué(s) avec succès à {$userName}. L'utilisateur a été notifié.",
+            'data' => [
+                'user_id' => $user->id,
+                'credits_ajoutes' => $nombre,
+                'nouveau_solde' => $nouveauTotal,
+                'portefeuille' => $servicePortefeuille->obtenirResumePortefeuille($user),
+            ],
+        ]);
+    }
 }
 
