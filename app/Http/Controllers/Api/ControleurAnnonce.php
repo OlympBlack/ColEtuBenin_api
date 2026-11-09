@@ -35,7 +35,7 @@ class ControleurAnnonce extends ManagedAnnonceController
             // On prépare le payload. Le service s'occupe de vérifier les crédits et de créer l'annonce.
             $payload = [
                 'titre' => $validated['titre'],
-                'description' => $validated['description'],
+                'description' => $validated['description'] ?? null,
                 'quartier' => $validated['quartier'],
                 'universite_id' => $request->universiteId(),
                 'loyer' => $validated['loyer'],

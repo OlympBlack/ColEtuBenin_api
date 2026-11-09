@@ -17,10 +17,10 @@ class StoreAnnonceRequest extends FormRequest
     {
         return [
             'titre' => ['required', 'string', 'max:255'],
-            'description' => ['required', 'string', 'max:2000'],
+            'description' => ['nullable', 'string', 'max:2000'],
             'universite_id' => ['nullable', 'integer', 'exists:universites,id'],
             'universite' => ['nullable', 'string', 'max:20', 'exists:universites,code'],
-            'quartier' => ['required', 'string', 'max:120', Rule::exists('quartiers', 'nom')],
+            'quartier' => ['required', 'string', 'max:120'],
             'loyer' => ['required', 'integer', 'min:0'],
             'caution' => ['required', 'numeric', 'min:0'],
             'source_eau' => ['required', 'in:SONEB,Forage'],
@@ -45,14 +45,6 @@ class StoreAnnonceRequest extends FormRequest
                 $validator->errors()->add('universite', 'Indiquez l\'université (code ou identifiant).');
 
                 return;
-            }
-
-            $universite = $this->resolveUniversite();
-            if ($universite && $quartier = $this->input('quartier')) {
-                $existe = $universite->quartiers()->where('nom', $quartier)->exists();
-                if (!$existe) {
-                    $validator->errors()->add('quartier', 'Ce quartier n\'appartient pas à l\'université indiquée.');
-                }
             }
 
             if ($this->input('type_annonce') === 'RECHERCHE_BINOME' && $this->hasFile('medias')) {

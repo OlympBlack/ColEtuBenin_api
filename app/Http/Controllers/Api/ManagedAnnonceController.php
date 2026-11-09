@@ -128,7 +128,7 @@ class ManagedAnnonceController extends Controller
     {
         return [
             'titre' => $validated['titre'],
-            'description' => $validated['description'],
+            'description' => $validated['description'] ?? null,
             'quartier' => $validated['quartier'],
             'universite_id' => $universiteId,
             'loyer' => $validated['loyer'],
