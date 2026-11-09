@@ -19,9 +19,14 @@ class ServiceForfaitPublications
 
     public function listerForfaitsActifs()
     {
-        return ForfaitPublication::where('est_actif', true)
+        $forfaits = ForfaitPublication::where('est_actif', true)
             ->orderBy('ordre_affichage')
+            ->orderBy('id')
             ->get();
+
+        return $forfaits->unique(function ($item) {
+            return trim(mb_strtolower($item->titre));
+        })->values();
     }
 
     /**
