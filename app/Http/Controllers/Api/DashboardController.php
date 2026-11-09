@@ -51,11 +51,25 @@ class DashboardController extends Controller
         }
         $conversations = $uniqueConversations;
 
+        $completionPct = ProfileDataManager::completionPercentage($user);
+        $isVerified = (bool) (
+            $user->is_verified ||
+            $user->statut_verification === 'valide' ||
+            $user->statut_verification === 'verifie' ||
+            ($user->is_valide ?? false)
+        );
+        $profileCompleted = (bool) (
+            $user->profile_completed ||
+            $completionPct >= 100 ||
+            $isVerified ||
+            $user->role === 'admin'
+        );
+
         $baseData = [
             'user' => ApiData::user($user),
             'profile_progress' => [
-                'percentage' => ProfileDataManager::completionPercentage($user),
-                'completed' => (bool) $user->profile_completed,
+                'percentage' => $completionPct,
+                'completed' => $profileCompleted,
             ],
             'verification' => [
                 'statut' => $user->statut_verification,

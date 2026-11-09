@@ -36,6 +36,20 @@ class ApiData
     {
         $user->loadMissing(['profilEtudiant', 'profilDemarcheur', 'profilBoutique', 'documentsIdentite']);
 
+        $completionPct = ProfileDataManager::completionPercentage($user);
+        $isVerified = (bool) (
+            $user->is_verified ||
+            $user->statut_verification === 'valide' ||
+            $user->statut_verification === 'verifie' ||
+            ($user->is_valide ?? false)
+        );
+        $profileCompleted = (bool) (
+            $user->profile_completed ||
+            $completionPct >= 100 ||
+            $isVerified ||
+            $user->role === 'admin'
+        );
+
         return [
             'id' => $user->id,
             'name' => $user->name,
@@ -44,9 +58,10 @@ class ApiData
             'telephone' => $user->telephone,
             'role' => $user->role,
             'photo_profil' => self::fileUrl($user->photo_profil),
-            'is_verified' => (bool) $user->is_verified,
-            'is_valide' => (bool) ($user->is_valide ?? false),
-            'profile_completed' => (bool) $user->profile_completed,
+            'is_verified' => $isVerified,
+            'is_valide' => (bool) (($user->is_valide ?? false) || $isVerified),
+            'profile_completed' => $profileCompleted,
+            'profile_completion_percentage' => $completionPct,
             'credits_restants' => (int) ($user->portefeuillePublication?->credits_restants ?? 0),
             'statut_verification' => $user->statut_verification,
             'commentaire_admin' => $user->commentaire_admin,

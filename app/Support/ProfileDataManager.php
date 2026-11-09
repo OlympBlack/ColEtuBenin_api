@@ -55,6 +55,16 @@ class ProfileDataManager
 
     public static function completionPercentage(User $user): int
     {
+        if (
+            $user->role === 'admin' ||
+            (bool) $user->is_verified ||
+            (bool) ($user->is_valide ?? false) ||
+            $user->statut_verification === 'valide' ||
+            $user->statut_verification === 'verifie'
+        ) {
+            return 100;
+        }
+
         $checks = [
             filled($user->name),
             filled($user->prenoms),
