@@ -147,6 +147,8 @@ class ApiData
             'type_chambre' => $annonce->type_chambre,
             'nombre_places' => $annonce->nombre_places ? (int) $annonce->nombre_places : ($annonce->type_annonce === 'PLACE_LIBRE_HOTE' ? 1 : null),
             'statut_disponibilite' => $annonce->statut_disponibilite,
+            'statut_publication' => $annonce->statut_publication ?? 'active',
+            'vues_count' => (int) ($annonce->vues_count ?? 0),
             'created_at' => $annonce->created_at?->toIso8601String(),
             'user' => [
                 'id' => $annonce->user?->id,

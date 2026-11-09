@@ -31,6 +31,7 @@ class Annonce extends Model
             'loyer' => 'integer',
             'caution' => 'decimal:2',
             'nombre_places' => 'integer',
+            'vues_count' => 'integer',
         ];
     }
 
